@@ -3,7 +3,7 @@ const download = @import("download");
 usingnamespace std.build;
 
 const Self = @This();
-const name = "z";
+const name = "sqlite3";
 
 pub const version = std.build.Version{
     .major = 3,
