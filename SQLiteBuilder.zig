@@ -17,6 +17,25 @@ pub const LinkType = enum {
     shared,
 };
 
+pub const ThreadSafety = enum {
+    single_threaded,
+    serialized,
+    multi_threaded,
+
+    fn toCompileParameter(self: @This()) []const u8 {
+        return switch (self) {
+            .single_threaded => "-DSQLITE_THREADSAFE=0",
+            .serialized => "-DSQLITE_THREADSAFE=1",
+            .multi_threaded => "-DSQLITE_THREADSAFE=2",
+        };
+    }
+};
+
+pub const Options = struct {
+    link_type: LinkType = .system,
+    thread_safety: ThreadSafety = .serialized,
+};
+
 config: ?struct {
     arena: std.heap.ArenaAllocator,
     lib: *LibExeObjStep,
@@ -27,9 +46,9 @@ pub fn init(
     b: *Builder,
     target: Target,
     mode: std.builtin.Mode,
-    link_type: LinkType,
+    options: Options,
 ) !Self {
-    return if (link_type == .system)
+    return if (options.link_type == .system)
         Self{ .config = null }
     else blk: {
         var arena = std.heap.ArenaAllocator.init(b.allocator);
@@ -43,21 +62,29 @@ pub fn init(
             .{},
         );
 
-        const lib = if (link_type == .static)
+        const lib = if (options.link_type == .static)
             b.addStaticLibrary(name, null)
         else
             b.addSharedLibrary(name, null, .{ .versioned = version });
 
         for (srcs) |src| {
-            lib.addCSourceFile(try std.fs.path.join(allocator, &[_][]const u8{
-                base_path, src,
-            }), &[_][]const u8{});
+            const flags = &[_][]const u8{
+                options.thread_safety.toCompileParameter(),
+            };
+
+            lib.addCSourceFile(
+                try std.fs.path.join(allocator, &[_][]const u8{
+                    base_path, src,
+                }),
+                flags,
+            );
         }
 
         lib.addIncludeDir(base_path);
         lib.setTarget(target);
         lib.setBuildMode(mode);
         lib.linkLibC();
+
         break :blk Self{
             .config = .{
                 .arena = arena,
