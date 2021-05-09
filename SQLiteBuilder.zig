@@ -5,12 +5,6 @@ usingnamespace std.build;
 const Self = @This();
 const name = "sqlite3";
 
-pub const version = std.build.Version{
-    .major = 3,
-    .minor = 35,
-    .patch = 2,
-};
-
 pub const LinkType = enum {
     system,
     static,
@@ -34,6 +28,13 @@ pub const ThreadSafety = enum {
 pub const Options = struct {
     link_type: LinkType = .system,
     thread_safety: ThreadSafety = .serialized,
+
+    version_year: usize = 2021,
+    version: std.build.Version = .{
+        .major = 3,
+        .minor = 35,
+        .patch = 5,
+    },
 };
 
 config: ?struct {
@@ -55,17 +56,24 @@ pub fn init(
         errdefer arena.deinit();
 
         const allocator = &arena.allocator;
-        const base_path = try download.tar.gz(
-            allocator,
-            b.cache_root,
-            "https://www.sqlite.org/2021/sqlite-autoconf-3350400.tar.gz",
-            .{},
-        );
+
+        const url = blk2: {
+            var buf: [2048]u8 = undefined;
+
+            break :blk2 try std.fmt.bufPrint(&buf, "https://www.sqlite.org/{d}/sqlite-autoconf-{d}{d:0>2}{d:0>2}00.tar.gz", .{
+                options.version_year,
+                options.version.major,
+                options.version.minor,
+                options.version.patch,
+            });
+        };
+
+        const base_path = try download.tar.gz(allocator, b.cache_root, url, .{});
 
         const lib = if (options.link_type == .static)
             b.addStaticLibrary(name, null)
         else
-            b.addSharedLibrary(name, null, .{ .versioned = version });
+            b.addSharedLibrary(name, null, .{ .versioned = options.version });
 
         for (srcs) |src| {
             const flags = &[_][]const u8{
