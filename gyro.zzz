@@ -2,4 +2,4 @@ pkgs:
   SQLiteBuilder:
     version: 3.35.2
 deps:
-  mattnite/download: ^0.1.0
+  mattnite/download: ^0.1.1
