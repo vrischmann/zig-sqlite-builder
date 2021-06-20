@@ -2,7 +2,7 @@ pkgs:
   SQLiteBuilder:
     version: 3.35.2
 deps:
-  mattnite/download:
+  download:
     src:
       github:
         user: vrischmann
