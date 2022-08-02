@@ -29,7 +29,7 @@ pub const Options = struct {
     thread_safety: ThreadSafety = .serialized,
 
     version_year: usize = 2021,
-    version: std.build.Version = .{
+    version: std.builtin.Version = .{
         .major = 3,
         .minor = 35,
         .patch = 5,
