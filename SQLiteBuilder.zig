@@ -1,6 +1,5 @@
 const std = @import("std");
 const download = @import("download");
-usingnamespace std.build;
 
 const Self = @This();
 const name = "sqlite3";
@@ -39,13 +38,13 @@ pub const Options = struct {
 
 config: ?struct {
     arena: std.heap.ArenaAllocator,
-    lib: *LibExeObjStep,
+    lib: *std.build.LibExeObjStep,
     include_dir: []const u8,
 },
 
 pub fn init(
-    b: *Builder,
-    target: Target,
+    b: *std.build.Builder,
+    target: std.build.Target,
     mode: std.builtin.Mode,
     options: Options,
 ) !Self {
@@ -109,7 +108,7 @@ pub fn deinit(self: *Self) void {
     }
 }
 
-pub fn link(self: Self, other: *LibExeObjStep) void {
+pub fn link(self: Self, other: *std.build.LibExeObjStep) void {
     if (self.config) |config| {
         other.linkLibrary(config.lib);
         other.addIncludeDir(config.include_dir);
