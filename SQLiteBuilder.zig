@@ -28,11 +28,11 @@ pub const Options = struct {
     link_type: LinkType = .system,
     thread_safety: ThreadSafety = .serialized,
 
-    version_year: usize = 2021,
+    version_year: usize = 2022,
     version: std.builtin.Version = .{
         .major = 3,
-        .minor = 35,
-        .patch = 5,
+        .minor = 39,
+        .patch = 2,
     },
 };
 
