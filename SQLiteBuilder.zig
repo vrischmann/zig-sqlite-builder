@@ -44,7 +44,7 @@ config: ?struct {
 
 pub fn init(
     b: *std.build.Builder,
-    target: std.build.Target,
+    target: std.zig.CrossTarget,
     mode: std.builtin.Mode,
     options: Options,
 ) !Self {
